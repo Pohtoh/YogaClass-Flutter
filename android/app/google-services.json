@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "315564405978",
+    "project_id": "test-b64de",
+    "storage_bucket": "test-b64de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:315564405978:android:a9638b02f6c7263cc6a1e3",
+        "android_client_info": {
+          "package_name": "com.example.coursework"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2pxYhK_mLT2mCURsLiJgn9-u7C2UGzEk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
