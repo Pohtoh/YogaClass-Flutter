@@ -2,60 +2,65 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+class _HomeScreenState extends State<HomeScreen> {
+  List<Map<String, dynamic>> allSchedules = [];
+  Map<int, String> classTypeMap = {};
 
   @override
-  Widget build(BuildContext context) {
-    return YogaScheduleList();
+  void initState() {
+    super.initState();
+    fetchData();
   }
+
+Future<void> fetchData() async {
+  final classSnapshot = await FirebaseFirestore.instance.collection('YogaClasses').get();
+  final scheduleSnapshot = await FirebaseFirestore.instance.collection('YogaSchedules').get();
+
+  classTypeMap = {
+    for (var doc in classSnapshot.docs)
+      (doc.data()['id'] as int): (doc.data()['classType']).toString()
+  };
+
+  final schedules = scheduleSnapshot.docs.map((doc) {
+    final data = doc.data();
+    final yogaClassID = (data['yogaClassID'] as int?) ?? 0;
+
+    return {
+      'id': data['id'] ?? '',
+      'teacher': data['teacher']?.toString() ?? '',
+      'date': data['date']?.toString() ?? '',
+      'description': data['description']?.toString() ?? '',
+      'classType': classTypeMap[yogaClassID] ?? 'Unknown',
+      'price': data['price'] ?? '',
+    };
+  }).toList();
+
+  setState(() {
+    allSchedules = schedules;
+  });
 }
-
-class YogaSchedule{
-  final int id;
-  final String date;
-  final String teacher;
-  final String description;
-  final int classId;
-
-  YogaSchedule({required this.id,required this.date,required this.teacher,required this.description,required this.classId});
-
-  factory YogaSchedule.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return YogaSchedule(
-      id: int.tryParse(data['id'].toString()) ?? 0,
-      date: data['date'] ?? '',
-      teacher: data['teacher'] ?? '',
-      description: data['description'] ?? '',
-      classId: int.tryParse(data['classId'].toString()) ?? 0,
-    );
-  }
-}
-class YogaScheduleList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Yoga Current Schedule')),
-      body: StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('YogaSchedules').snapshots(),
-      builder: (context, snapshot){
-    if (snapshot.hasError) return Center(child: Text('Error: ${snapshot.error}'));
-    if (snapshot.connectionState == ConnectionState.waiting) return Center(child: CircularProgressIndicator());
-
-    final data = snapshot.data!.docs.map((doc) => YogaSchedule.fromFirestore(doc)).toList();
-
-    return ListView.builder(
-      itemCount: data.length,
+      appBar: AppBar(title: const Text("Search Yoga Schedules")),
+      body: allSchedules.isEmpty ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+      itemCount: allSchedules.length,
       itemBuilder: (context, index) {
-        final yogaSchedule = data[index];
+        final yogaSchedule = allSchedules[index];
         return ListTile(
-          title: Text(yogaSchedule.date),
-          subtitle: Text(yogaSchedule.teacher),
+          title: Text(yogaSchedule['date']),
+          subtitle: Text("Class: ${yogaSchedule['classType']} - Teacher: ${(yogaSchedule["teacher"])}"
+              "\n${yogaSchedule["description"]}")
           );
-        }
-      );
-    },
-    )
+      },
+      ),
     );
   }
 }
+

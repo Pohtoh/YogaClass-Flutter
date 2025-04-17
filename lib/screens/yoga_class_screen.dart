@@ -67,7 +67,7 @@ class YogaClassList extends StatelessWidget {
               final yogaClass = yogaClasses[index];
               return ListTile(
                 title: Text(yogaClass.classType),
-                subtitle: Text('${yogaClass.day}, ${yogaClass.time}'),
+                subtitle: Text('${yogaClass.time} - ${yogaClass.day}\n${yogaClass.price}£ - ${yogaClass.duration} Minute\n${yogaClass.description}'),
               );
             },
           );
